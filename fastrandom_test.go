@@ -67,14 +67,14 @@ func BenchmarkFastMT1000(b *testing.B) {
 	benchmarkFastMT(b, 1000)
 }
 
-func BenchmarkStandard1073741824(b *testing.B) {
-	benchmarkStandard(b, 1073741824)
+func BenchmarkStandard1000000(b *testing.B) {
+	benchmarkStandard(b, 1000000)
 }
 
-func BenchmarkFast1073741824(b *testing.B) {
-	benchmarkFast(b, 1073741824)
+func BenchmarkFast1000000(b *testing.B) {
+	benchmarkFast(b, 1000000)
 }
 
-func BenchmarkFastMT1073741824(b *testing.B) {
-	benchmarkFastMT(b, 1073741824)
+func BenchmarkFastMT1000000(b *testing.B) {
+	benchmarkFastMT(b, 1000000)
 }
