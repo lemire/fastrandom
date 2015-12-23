@@ -1,1 +1,1 @@
-go get github.com/CasualSuperman/Mersenne-Twister
+$ go get github.com/davidminor/gorand/pcg

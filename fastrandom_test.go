@@ -4,8 +4,10 @@ import (
 	"math/rand"
 	"testing"
 )
+import "github.com/davidminor/gorand/pcg"
 
 var rgen = Init(4111)
+var p = pcg.NewPcg32(111)
 
 //go test -bench=.
 func benchmarkStandardNoRange(b *testing.B) {
@@ -24,57 +26,83 @@ func benchmarkFast(b *testing.B, r uint32) {
 	}
 }
 
+func benchmarkDivBased(b *testing.B, r uint32) {
+	for i := 0; i < b.N; i++ {
+		divbased_randuint32(r)
+	}
+}
+
 //go test -bench=.
 func benchmarkMTNoRange(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		rgen.Next()
 	}
 }
+
+func benchmarkDivBasedMT(b *testing.B, r uint32) {
+	for i := 0; i < b.N; i++ {
+		divbased_randuint32mt(r, rgen)
+	}
+}
+
 func benchmarkFastMT(b *testing.B, r uint32) {
 	for i := 0; i < b.N; i++ {
 		randuint32mt(r, rgen)
 	}
 }
 
-func BenchmarkStandard(b *testing.B) {
-	benchmarkStandardNoRange(b)
+func benchmarkFastPCG(b *testing.B, r uint32) {
+	b.StopTimer()
+	array := make([]int, r, r)
+	for i := 0; i < int(r); i++ {
+		array[i] = i
+	}
+	b.StartTimer()
+	for j := 0; j < b.N; j++ {
+
+		for i := r; i > 0; i-- {
+			idx := randuint32pcg(uint32(i), &p)
+			tmp := array[idx]
+			array[idx] = array[i-1]
+			array[i-1] = tmp
+		}
+	}
+}
+func benchmarkPCG(b *testing.B, r uint32) {
+	b.StopTimer()
+	array := make([]int, r, r)
+	for i := 0; i < int(r); i++ {
+		array[i] = i
+	}
+	b.StartTimer()
+	for j := 0; j < b.N; j++ {
+		for i := r; i > 0; i-- {
+			idx := p.NextN(uint32(i))
+			tmp := array[idx]
+			array[idx] = array[i-1]
+			array[i-1] = tmp
+		}
+	}
 }
 
-func BenchmarkStandardMT(b *testing.B) {
-	benchmarkMTNoRange(b)
+func BenchmarkPCG1000(b *testing.B) {
+	benchmarkPCG(b, 1000)
 }
-func BenchmarkStandard100(b *testing.B) {
-	benchmarkStandard(b, 100)
-}
-
-func BenchmarkFast100(b *testing.B) {
-	benchmarkFast(b, 100)
+func BenchmarkFastPCG1000(b *testing.B) {
+	benchmarkFastPCG(b, 1000)
 }
 
-func BenchmarkFastMT100(b *testing.B) {
-	benchmarkFastMT(b, 100)
+func BenchmarkPCG1000000(b *testing.B) {
+	benchmarkPCG(b, 1000000)
+}
+func BenchmarkFastPCG1000000(b *testing.B) {
+	benchmarkFastPCG(b, 1000000)
 }
 
-func BenchmarkStandard1000(b *testing.B) {
-	benchmarkStandard(b, 1000)
-}
 
-func BenchmarkFast1000(b *testing.B) {
-	benchmarkFast(b, 1000)
+func BenchmarkPCG10000000(b *testing.B) {
+	benchmarkPCG(b, 10000000)
 }
-
-func BenchmarkFastMT1000(b *testing.B) {
-	benchmarkFastMT(b, 1000)
-}
-
-func BenchmarkStandard1000000(b *testing.B) {
-	benchmarkStandard(b, 1000000)
-}
-
-func BenchmarkFast1000000(b *testing.B) {
-	benchmarkFast(b, 1000000)
-}
-
-func BenchmarkFastMT1000000(b *testing.B) {
-	benchmarkFastMT(b, 1000000)
+func BenchmarkFastPCG10000000(b *testing.B) {
+	benchmarkFastPCG(b, 10000000)
 }
