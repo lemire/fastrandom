@@ -34,28 +34,6 @@ func benchmarkPrePCG(b *testing.B, r uint32) {
 	}
 }
 
-// precomputes the random numbers *and* outputs to a new array
-func benchmarkPreoutPCG(b *testing.B, r uint32) {
-	b.StopTimer()
-	array := make([]int, r, r)
-	arrayout := make([]int, r, r)
-	randarray := make([]uint32, r+1, r+1)
-	for i := 0; i < int(r); i++ {
-		array[i] = i
-	}
-	for i := r; i > 0; i-- {
-		randarray[i] = randuint32pcg(uint32(i), &p)
-	}
-	b.StartTimer()
-	for j := 0; j < b.N; j++ {
-		for i := r; i > 0; i-- {
-			idx := randarray[i]
-			arrayout[i-1] = array[idx]
-		}
-	}
-}
-
-
 
 // our fast approach that avoids division
 func benchmarkFastPCG(b *testing.B, r uint32) {
@@ -100,9 +78,7 @@ func BenchmarkStandardShuffleWithPCGWithDivision1000(b *testing.B) {
 func BenchmarkShuffleWithPrecomputedRandomNumbers1000(b *testing.B) {
 	benchmarkPrePCG(b, 1000)
 }
-func BenchmarkShuffleWithPrecomputedRandomNumbersAndOutputsToNewArrayPreoutPCG1000(b *testing.B) {
-	benchmarkPreoutPCG(b, 1000)
-}
+
 func BenchmarkStandardShuffleWithPCGButNoDivisionFastPCG1000(b *testing.B) {
 	benchmarkFastPCG(b, 1000)
 }
