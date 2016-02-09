@@ -46,7 +46,9 @@ func benchmarkFastPCG(b *testing.B, r uint32) {
 	for j := 0; j < b.N; j++ {
 
 		for i := r; i > 0; i-- {
-			idx := randuint32pcg(uint32(i), &p)
+			// next line is much faster which suggests inlining issue
+                        //idx := uint32((uint64(p.Next()) * uint64(r))>>32) 
+                        idx := randuint32pcg(uint32(i), &p)
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
