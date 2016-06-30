@@ -1,12 +1,14 @@
 package fastrandom
 
-import "github.com/davidminor/gorand/pcg"
+import (
+	"github.com/dgryski/go-pcgr"
+)
 
-// return a pseudo-random number in [0,r), avoiding divisions, uses the PCG for random bits
-func randuint32pcg(r uint32, pcg *pcg.Pcg32) uint32 {
+// return a pseudo-random number in [0,r), avoiding divisions, uses the dgryski' PCG for random bits
+func randuint32pcg_dgryski(r uint32, pcg *pcgr.Rand) uint32 {
 	random32bit := pcg.Next()
 	multiresult := uint64(random32bit) * uint64(r)
-	leftover := uint32(multiresult) 
+	leftover := uint32(multiresult)
 	if leftover < r {
 		threshold := uint32(-r) % r
 		for leftover < threshold {

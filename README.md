@@ -6,12 +6,16 @@ to get a "fast" shuffle in Go.
 
 
 ```bash
-$ go get github.com/davidminor/gorand/pcg
+$ go get github.com/dgryski/go-pcgr
+$ go version
+go version go1.7beta2 linux/amd64
 $ go test -bench=.
 testing: warning: no tests to run
-BenchmarkStandardShuffleWithGo1000-2                        50000         30891 ns/op
-BenchmarkStandardShuffleWithPCGWithDivision1000-2          100000         12006 ns/op
-BenchmarkStandardShuffleWithPCGButNoDivision1000-2         200000          8803 ns/op
+BenchmarkStandardShuffleWithGo1000-2                                50000         30628 ns/op
+BenchmarkStandardShuffleWithPCGWithDivision1000_dgryski-2          200000          9016 ns/op
+BenchmarkStandardShuffleWithPCGButNoDivision1000_dgryski-2         300000          5066 ns/op
+PASS
+ok      _/home/dlemire/CVS/github/fastrandom    5.293s
 ```
 
 Further reading: 

@@ -1,14 +1,12 @@
 package fastrandom
 
 import (
+	"math/rand"
 	"testing"
-        "math/rand"
 )
-import "github.com/davidminor/gorand/pcg"
+import "github.com/dgryski/go-pcgr"
 
-var p = pcg.NewPcg32(111)
-
-var seed = uint32(123456789)
+var p = pcgr.Rand{0x0ddc0ffeebadf00d, 0xcafebabe}
 
 //go test -bench=.
 
@@ -23,7 +21,7 @@ func benchmarkGo(b *testing.B, r uint32) {
 	for j := 0; j < b.N; j++ {
 
 		for i := r; i > 0; i-- {
-                        idx := rand.Int31n(int32(i))
+			idx := rand.Int31n(int32(i))
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
@@ -32,7 +30,7 @@ func benchmarkGo(b *testing.B, r uint32) {
 }
 
 // our fast approach that avoids division
-func benchmarkFastPCG(b *testing.B, r uint32) {
+func benchmarkFastPCG_dgryski(b *testing.B, r uint32) {
 	b.StopTimer()
 	array := make([]int, r, r)
 	for i := 0; i < int(r); i++ {
@@ -41,8 +39,7 @@ func benchmarkFastPCG(b *testing.B, r uint32) {
 	b.StartTimer()
 	for j := 0; j < b.N; j++ {
 		for i := r; i > 0; i-- {
-			// next line is much faster which suggests inlining issue
-                        idx := randuint32pcg(uint32(i), &p)
+			idx := randuint32pcg_dgryski(uint32(i), &p)
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
@@ -51,7 +48,7 @@ func benchmarkFastPCG(b *testing.B, r uint32) {
 }
 
 // standard PCG
-func benchmarkPCG(b *testing.B, r uint32) {
+func benchmarkPCG_dgryski(b *testing.B, r uint32) {
 	b.StopTimer()
 	array := make([]int, r, r)
 	for i := 0; i < int(r); i++ {
@@ -60,22 +57,22 @@ func benchmarkPCG(b *testing.B, r uint32) {
 	b.StartTimer()
 	for j := 0; j < b.N; j++ {
 		for i := r; i > 0; i-- {
-			idx := p.NextN(uint32(i))
+			idx := p.Bound(uint32(i))
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
 		}
 	}
 }
+
 func BenchmarkStandardShuffleWithGo1000(b *testing.B) {
 	benchmarkGo(b, 1000)
 }
 
-func BenchmarkStandardShuffleWithPCGWithDivision1000(b *testing.B) {
-	benchmarkPCG(b, 1000)
+func BenchmarkStandardShuffleWithPCGWithDivision1000_dgryski(b *testing.B) {
+	benchmarkPCG_dgryski(b, 1000)
 }
 
-func BenchmarkStandardShuffleWithPCGButNoDivision1000(b *testing.B) {
-	benchmarkFastPCG(b, 1000)
+func BenchmarkStandardShuffleWithPCGButNoDivision1000_dgryski(b *testing.B) {
+	benchmarkFastPCG_dgryski(b, 1000)
 }
-
