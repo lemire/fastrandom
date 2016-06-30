@@ -2,6 +2,7 @@ package fastrandom
 
 import (
 	"testing"
+        "math/rand"
 )
 import "github.com/davidminor/gorand/pcg"
 
@@ -11,29 +12,24 @@ var seed = uint32(123456789)
 
 //go test -bench=.
 
-// precomputes the random numbers
-func benchmarkPrePCG(b *testing.B, r uint32) {
+// standard
+func benchmarkGo(b *testing.B, r uint32) {
 	b.StopTimer()
 	array := make([]int, r, r)
-	randarray := make([]uint32, r+1, r+1)
 	for i := 0; i < int(r); i++ {
 		array[i] = i
-	}
-	for i := r; i > 0; i-- {
-		randarray[i] = randuint32pcg(uint32(i), &p)
 	}
 	b.StartTimer()
 	for j := 0; j < b.N; j++ {
 
 		for i := r; i > 0; i-- {
-			idx := randarray[i]
+                        idx := rand.Int31n(int32(i))
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
 		}
 	}
 }
-
 
 // our fast approach that avoids division
 func benchmarkFastPCG(b *testing.B, r uint32) {
@@ -44,10 +40,8 @@ func benchmarkFastPCG(b *testing.B, r uint32) {
 	}
 	b.StartTimer()
 	for j := 0; j < b.N; j++ {
-
 		for i := r; i > 0; i-- {
 			// next line is much faster which suggests inlining issue
-                        //idx := uint32((uint64(p.Next()) * uint64(r))>>32) 
                         idx := randuint32pcg(uint32(i), &p)
 			tmp := array[idx]
 			array[idx] = array[i-1]
@@ -73,15 +67,15 @@ func benchmarkPCG(b *testing.B, r uint32) {
 		}
 	}
 }
+func BenchmarkStandardShuffleWithGo1000(b *testing.B) {
+	benchmarkGo(b, 1000)
+}
 
 func BenchmarkStandardShuffleWithPCGWithDivision1000(b *testing.B) {
 	benchmarkPCG(b, 1000)
 }
-func BenchmarkShuffleWithPrecomputedRandomNumbers1000(b *testing.B) {
-	benchmarkPrePCG(b, 1000)
-}
 
-func BenchmarkStandardShuffleWithPCGButNoDivisionFastPCG1000(b *testing.B) {
+func BenchmarkStandardShuffleWithPCGButNoDivision1000(b *testing.B) {
 	benchmarkFastPCG(b, 1000)
 }
 
