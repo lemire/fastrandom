@@ -5,7 +5,7 @@ import (
 )
 
 // return a pseudo-random number in [0,r), avoiding divisions, uses the dgryski' PCG for random bits
-func randuint32pcg_dgryski(r uint32, pcg *pcgr.Rand) uint32 {
+func Randuint32pcg_dgryski(r uint32, pcg *pcgr.Rand) uint32 {
 	random32bit := pcg.Next()
 	multiresult := uint64(random32bit) * uint64(r)
 	leftover := uint32(multiresult)

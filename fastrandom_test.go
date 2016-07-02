@@ -39,7 +39,7 @@ func benchmarkFastPCG_dgryski(b *testing.B, r uint32) {
 	b.StartTimer()
 	for j := 0; j < b.N; j++ {
 		for i := r; i > 0; i-- {
-			idx := randuint32pcg_dgryski(uint32(i), &p)
+			idx := Randuint32pcg_dgryski(uint32(i), &p)
 			tmp := array[idx]
 			array[idx] = array[i-1]
 			array[i-1] = tmp
