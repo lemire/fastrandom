@@ -1,6 +1,7 @@
 package fastrandom
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -8,29 +9,49 @@ import "github.com/dgryski/go-pcgr"
 
 var p = pcgr.Rand{0x0ddc0ffeebadf00d, 0xcafebabe}
 
-
 func testFastShortShuffle(t *testing.T, key uint32, N uint) {
 	for i := N; i >= 3; i-- {
 		mn := precomputedMagicNumber[i-3]
 		fa := precomputedFactorial[i-3]
 		divresult := fastDiv(key, &mn) // value in [0,i)
-    expresult := key / fa
-    if divresult != expresult {
-      t.Error("Expected ",expresult, ", got ", divresult)
-    }
-		key = key - divresult*fa       // value in [0,(i-1)!)
+		expresult := key / fa
+		if divresult != expresult {
+			t.Error("Expected ", expresult, ", got ", divresult)
+		}
+		key = key - divresult*fa // value in [0,(i-1)!)
 	}
 }
 
-
 func TestFastDiv(t *testing.T) {
-  N:= uint(11)
-  m := precomputedFactorial[N-2]
-  for  ; m >0 ; m-- {
-    testFastShortShuffle(t,m,N)
-  }
+	N := uint(11)
+	m := precomputedFactorial[N-2] - 1
+	for ; m > 0; m-- {
+		testFastShortShuffle(t, m, N)
+	}
 }
 
+func toId(vals []uint, N uint) uint {
+	v := uint(0)
+	for i := uint(0); i < N; i++ {
+		v = v*N + vals[i]
+	}
+	return v
+}
+
+func TestFastShuffle(t *testing.T) {
+	N := uint(5)
+
+	x := make(map[uint]bool)
+	m := precomputedFactorial[N-2]
+	for mm := uint32(0); mm < m; mm++ {
+		sh := FastShortShuffle(mm, N)
+		fmt.Println(sh)
+		x[toId(sh, N)] = true
+	}
+	if uint32(len(x)) != precomputedFactorial[N-2] {
+		t.Error("Expected ", precomputedFactorial[N-2], ", got ", len(x))
+	}
+}
 
 //go test -bench=.
 

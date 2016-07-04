@@ -9,7 +9,6 @@ import "fmt"
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 
-
 // precomputed factorials... 2!, 3!..., 12!
 var precomputedFactorial = [11]uint32{2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600}
 
@@ -22,6 +21,7 @@ type magicNumber struct {
 // magic numbers to divide by... 2!, 3!..., 12!
 
 var precomputedMagicNumber = [11]magicNumber{{0x80000000, 0}, {0xaaaaaaab, 2}, {0xaaaaaaab, 4}, {0x88888889, 6}, {0xb60b60b7, 9}, {0xd00d00d1, 12}, {0xd00d00d1, 15}, {0xb8ef1d2b, 18}, {0x24fc9f6f, 19}, {0x035cc8ad, 19}, {0x011eed8f, 21}}
+
 // (x*y) >> 32
 
 func high32(x uint32, y uint32) uint32 {
@@ -55,7 +55,7 @@ func FastShortShuffle(key uint32, N uint) []uint {
 		mn := precomputedMagicNumber[i-3]
 		fa := precomputedFactorial[i-3]
 		divresult := fastDiv(key, &mn) // value in [0,i)
-		key = key - divresult * fa       // value in [0,(i-1)!)
+		key = key - divresult*fa       // value in [0,(i-1)!)
 		// we swap
 		tmp := answer[divresult]
 		answer[divresult] = answer[i-1]
