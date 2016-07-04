@@ -16,30 +16,30 @@ var precomputedFactorial = [11]uint32{2, 6, 24, 120, 720, 5040, 40320, 362880, 3
 // magic number of fast division
 type magicNumber struct {
 	multiplier uint32
-	needAdd    bool
 	shift      uint
 }
 
 // magic numbers to divide by... 2!, 3!..., 12!
-var precomputedMagicNumber = [11]magicNumber{{0x80000000, false, 0}, {0xaaaaaaab, false, 2}, {0xaaaaaaab, false, 4}, {0x88888889, false, 6}, {0x6c16c16d, true, 9}, {0xa01a01a1, true, 12}, {0xa01a01a1, true, 15}, {0xb8ef1d2b, false, 18}, {0x24fc9f6f, false, 19}, {0x035cc8ad, false, 19}, {0x011eed8f, false, 21}}
 
+var precomputedMagicNumber = [11]magicNumber{{0x80000000, 0}, {0xaaaaaaab, 2}, {0xaaaaaaab, 4}, {0x88888889, 6}, {0xb60b60b7, 9}, {0xd00d00d1, 12}, {0xd00d00d1, 15}, {0xb8ef1d2b, 18}, {0x24fc9f6f, 19}, {0x035cc8ad, 19}, {0x011eed8f, 21}}
 // (x*y) >> 32
+
 func high32(x uint32, y uint32) uint32 {
 	return uint32((uint64(x) * uint64(y)) >> 32)
 }
 
-// fast division function
+// fast division function, uses exactly one multiplication and one shift
 func fastDiv(val uint32, mn *magicNumber) uint32 {
 	q := high32(mn.multiplier, val)
-	if mn.needAdd {
-		q = ((val - q) >> 1) + q
-	}
 	return q >> mn.shift
 }
 
 // Given a key in [0,N!) generates a shuffle *without* using any division.
 // You can generate a value in [0,N!) using randuint32pcg_dgryski
 // you probably don't want to use such a function... this is just a demo
+//
+// This function uses no division, but two multiplications (one 64-bit and one 32-bit), one shift
+// and one subtraction for 3,4..., N
 func FastShortShuffle(key uint32, N uint) []uint {
 	if (N < 2) || (N > 12) {
 		fmt.Errorf("out of bound")
@@ -55,7 +55,7 @@ func FastShortShuffle(key uint32, N uint) []uint {
 		mn := precomputedMagicNumber[i-3]
 		fa := precomputedFactorial[i-3]
 		divresult := fastDiv(key, &mn) // value in [0,i)
-		key = key - divresult*fa       // value in [0,(i-1)!)
+		key = key - divresult * fa       // value in [0,(i-1)!)
 		// we swap
 		tmp := answer[divresult]
 		answer[divresult] = answer[i-1]

@@ -8,6 +8,30 @@ import "github.com/dgryski/go-pcgr"
 
 var p = pcgr.Rand{0x0ddc0ffeebadf00d, 0xcafebabe}
 
+
+func testFastShortShuffle(t *testing.T, key uint32, N uint) {
+	for i := N; i >= 3; i-- {
+		mn := precomputedMagicNumber[i-3]
+		fa := precomputedFactorial[i-3]
+		divresult := fastDiv(key, &mn) // value in [0,i)
+    expresult := key / fa
+    if divresult != expresult {
+      t.Error("Expected ",expresult, ", got ", divresult)
+    }
+		key = key - divresult*fa       // value in [0,(i-1)!)
+	}
+}
+
+
+func TestFastDiv(t *testing.T) {
+  N:= uint(11)
+  m := precomputedFactorial[N-2]
+  for  ; m >0 ; m-- {
+    testFastShortShuffle(t,m,N)
+  }
+}
+
+
 //go test -bench=.
 
 // standard
