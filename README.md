@@ -1,5 +1,7 @@
 ## fastrandom
 
+(This code is for research purposes.)
+
 Fast random number generation in Go. We use a division-less range function
 to get a "fast" shuffle in Go.
 
